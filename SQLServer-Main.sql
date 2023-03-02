@@ -26,13 +26,13 @@ Implementation notes:
 
 -- These settings improves throughput of the database by reducing locking by better separating readers from writers.
 -- SQL Server 2012 and newer can refer to itself as CURRENT. Older ones need a workaround.
-DECLARE @current NVARCHAR(256);
-DECLARE @snapshotSettings NVARCHAR(612);
+--DECLARE @current NVARCHAR(256);
+--DECLARE @snapshotSettings NVARCHAR(612);
 
-SELECT @current = N'[' + (SELECT DB_NAME()) + N']';
-SET @snapshotSettings = N'ALTER DATABASE ' + @current + N' SET READ_COMMITTED_SNAPSHOT ON; ALTER DATABASE ' + @current + N' SET ALLOW_SNAPSHOT_ISOLATION ON;';
+--SELECT @current = N'[' + (SELECT DB_NAME()) + N']';
+--SET @snapshotSettings = N'ALTER DATABASE ' + @current + N' SET READ_COMMITTED_SNAPSHOT ON; ALTER DATABASE ' + @current + N' SET ALLOW_SNAPSHOT_ISOLATION ON;';
 
-EXECUTE sp_executesql @snapshotSettings;
+--EXECUTE sp_executesql @snapshotSettings;
 
 -- This table defines Orleans operational queries. Orleans uses these to manage its operations,
 -- these are the only queries Orleans issues to the database.
