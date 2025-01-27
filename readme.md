@@ -1,4 +1,4 @@
-# Orelans with .NET 7.0 samples
+# Orelans with .NET 9.0 samples
 
 Configuration required to run example:
 - Create database named 'OrleansDB'
