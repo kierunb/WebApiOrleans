@@ -10,8 +10,8 @@ public interface ITimerGrain : IGrainWithGuidKey
 
 public class TimerGrain : Grain, ITimerGrain
 {
-    private IDisposable _timer; 
-    
+    private IDisposable _timer;
+
     public void StartTimer()
     {
         Console.WriteLine($"Timer Started {DateTime.Now}");
@@ -26,15 +26,18 @@ public class TimerGrain : Grain, ITimerGrain
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
         int count = 1;
-        _timer = RegisterTimer(state =>
-        {
-            Console.WriteLine($"Timer number: {count}");
-            count++;
-            return base.OnActivateAsync(cancellationToken);
-        }, null,
-        TimeSpan.FromSeconds(3),
-        TimeSpan.FromSeconds(2));
-        
+
+        //_timer = RegisterTimer()
+
+        //_timer = RegisterTimer(state =>
+        //{
+        //    Console.WriteLine($"Timer number: {count}");
+        //    count++;
+        //    return base.OnActivateAsync(cancellationToken);
+        //}, null,
+        //TimeSpan.FromSeconds(3),
+        //TimeSpan.FromSeconds(2));
+
         return base.OnActivateAsync(cancellationToken);
 
     }

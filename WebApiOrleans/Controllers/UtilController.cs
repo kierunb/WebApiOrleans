@@ -1,37 +1,34 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApiOrleans.Grains;
 
-namespace WebApiOrleans.Controllers
+namespace WebApiOrleans.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class UtilController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UtilController : ControllerBase
+    private readonly IGrainFactory _grainFactory;
+
+    public UtilController(IGrainFactory grainFactory)
     {
-        private readonly IGrainFactory _grainFactory;
+        _grainFactory = grainFactory;
+    }
 
-        public UtilController(IGrainFactory grainFactory)
-        {
-            _grainFactory = grainFactory;
-        }
+    [HttpGet("ping-grain")]
+    public async Task<IActionResult> PingGrain()
+    {
+        var grain = _grainFactory.GetGrain<IPingGrain>(Guid.NewGuid());
+        await grain.Ping();
 
-        [HttpGet("timer")]
-        public async Task<IActionResult> StartTimer()
-        {
-            var grain = _grainFactory.GetGrain<ITimerGrain>(Guid.NewGuid());
-            grain.StartTimer();
+        return Ok();
+    }
 
-            return Ok();
-        }
+    [HttpGet("reminder")]
+    public async Task<IActionResult> StartReminder()
+    {
+        var grain = _grainFactory.GetGrain<IReminderGrain>(Guid.NewGuid().ToString());
+        await grain.SendMessage();
 
-        [HttpGet("reminder")]
-        public async Task<IActionResult> StartReminder()
-        {
-            var grain = _grainFactory.GetGrain<IReminderGrain>(Guid.NewGuid().ToString());
-            await grain.SendMessage();
-
-            return Ok();
-        }
+        return Ok();
     }
 }

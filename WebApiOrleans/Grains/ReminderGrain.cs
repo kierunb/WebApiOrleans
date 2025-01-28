@@ -1,6 +1,4 @@
-﻿using Orleans.Runtime;
-
-// https://learn.microsoft.com/en-us/dotnet/orleans/grains/timers-and-reminders
+﻿// https://learn.microsoft.com/en-us/dotnet/orleans/grains/timers-and-reminders
 
 namespace WebApiOrleans.Grains
 {
@@ -25,9 +23,7 @@ namespace WebApiOrleans.Grains
 
         public Task SendMessage()
         {
-            
             this.RegisterOrUpdateReminder(ReminderName, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
-
             return Task.CompletedTask;
         }
 
