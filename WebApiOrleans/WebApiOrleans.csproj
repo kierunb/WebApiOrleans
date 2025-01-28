@@ -9,11 +9,20 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Core" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Persistence.AdoNet" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Reminders.AdoNet" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Transactions" Version="9.0.1" />
+    <PackageReference Include="OpenTelemetry" Version="1.11.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.11.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.11.0-beta.1" />
     <PackageReference Include="OrleansDashboard" Version="8.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
