@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Orleans.Runtime;
 using WebApiOrleans.Grains;
 
 namespace WebApiOrleans.Controllers;
@@ -8,10 +9,18 @@ namespace WebApiOrleans.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IGrainFactory _grainFactory;
+    private readonly IClusterClient _clusterClient;
 
-    public UserController(IGrainFactory grainFactory)
+    public UserController(
+        IGrainFactory grainFactory,
+        IClusterClient clusterClient)
     {
         _grainFactory = grainFactory;
+        _clusterClient = clusterClient;
+
+        // IClusterClient is meant to be used from the client which is accessing the silo cluster (ex. webapi controller).
+        // IGrainFactory is used in a service class within a silo to get an instance of a Grain.
+        // https://stackoverflow.com/questions/60407743/in-orleans-when-to-use-igrainfactory-vs-iclusterclient
     }
 
 

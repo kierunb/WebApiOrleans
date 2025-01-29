@@ -5,12 +5,18 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Orleans.Configuration;
+using Orleans.Hosting;
+using WebApiOrleans.Grains;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// app services
+builder.Services.AddTransient<IChatObserver, ChatObserver>();
 
 // OpenTelemetry config
 var serviceName = builder.Configuration["OpenTelemetry:ServiceName"]!;
@@ -49,8 +55,10 @@ builder
         tracing.AddSqlClientInstrumentation();
     });
 
-// aspire dashboard standalone
-builder.Services.AddOpenTelemetry().UseOtlpExporter(OtlpExportProtocol.Grpc, new Uri(oltpEndpoint));
+// export to aspire dashboard standalone
+builder
+    .Services.AddOpenTelemetry()
+    .UseOtlpExporter(OtlpExportProtocol.Grpc, new Uri(oltpEndpoint));
 
 // Orleans Host with Dashboard and some services - SILO
 // https://learn.microsoft.com/en-us/dotnet/orleans/host/configuration-guide/adonet-configuration
@@ -60,6 +68,11 @@ builder.Host.UseOrleans(hostBuilder =>
 
     hostBuilder
         .UseLocalhostClustering()
+        .Configure<ClusterOptions>(options =>
+        {
+            options.ClusterId = "dev-cluster";
+            options.ServiceId = "dev-cluster";
+        })
         .AddMemoryGrainStorage("memory")
         .AddAdoNetGrainStorage(
             "db",
@@ -75,8 +88,9 @@ builder.Host.UseOrleans(hostBuilder =>
             options.Invariant = invariant;
             options.ConnectionString = builder.Configuration.GetConnectionString("OrleansDB");
         })
-        //.UseDashboard() // available at: http://localhost:8080/
-        .AddActivityPropagation()
+        //.UseDashboard() // Orleans Dasboard available at: http://localhost:8080/
+        .UseDashboard(x => x.HostSelf = true)
+        .AddActivityPropagation() // required for tracing
         .ConfigureLogging(logging => logging.AddConsole());
 });
 
@@ -94,5 +108,58 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Map("/dashboard", x => x.UseOrleansDashboard());    // self-hosted Orleans Dashboard
+
+app.MapGet(
+    "/shorten",
+    static async (IGrainFactory grains, HttpRequest request, string url) =>
+    {
+        var host = $"{request.Scheme}://{request.Host.Value}";
+
+        // Validate the URL query string.
+        if (
+            string.IsNullOrWhiteSpace(url)
+            || Uri.IsWellFormedUriString(url, UriKind.Absolute) is false
+        )
+        {
+            return Results.BadRequest(
+                $"""
+                The URL query string is required and needs to be well formed.
+                Consider, ${host}/shorten?url=https://www.microsoft.com.
+                """
+            );
+        }
+
+        // Create a unique, short ID
+        var shortenedRouteSegment = Guid.NewGuid().GetHashCode().ToString("X");
+
+        // Create and persist a grain with the shortened ID and full URL
+        var shortenerGrain = grains.GetGrain<IUrlShortenerGrain>(shortenedRouteSegment);
+
+        await shortenerGrain.SetUrl(url);
+
+        // Return the shortened URL for later use
+        var resultBuilder = new UriBuilder(host) { Path = $"/go/{shortenedRouteSegment}" };
+
+        return Results.Ok(resultBuilder.Uri);
+    }
+);
+
+app.MapGet(
+    "/go/{shortenedRouteSegment:required}",
+    static async (IGrainFactory grains, string shortenedRouteSegment) =>
+    {
+        // Retrieve the grain using the shortened ID and url to the original URL
+        var shortenerGrain = grains.GetGrain<IUrlShortenerGrain>(shortenedRouteSegment);
+
+        var url = await shortenerGrain.GetUrl();
+
+        // Handles missing schemes, defaults to "http://".
+        var redirectBuilder = new UriBuilder(url);
+
+        return Results.Redirect(redirectBuilder.Uri.ToString());
+    }
+);
 
 app.Run();
