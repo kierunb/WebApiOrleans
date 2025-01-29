@@ -51,6 +51,26 @@ public class UtilController : ControllerBase
         return Ok();
     }
 
+    [HttpGet("chat-demo")]
+    public async Task<IActionResult> ChatSubscribe()
+    {
+        var client1 = _grainFactory.GetGrain<IClientChatGrain>("user1");
+        var client2 = _grainFactory.GetGrain<IClientChatGrain>("user2");
+
+        //Create a reference for chat, usable for subscribing to the observable grain.
+        var reference = _grainFactory.CreateObjectReference<IChatObserver>(_chatObserver);
+
+        //Subscribe the instance to receive messages.
+        await client1.Subscribe(reference);
+        await client2.Subscribe(reference);
+
+        await client1.SendUpdateMessage("Hello, from Client 1");
+        await client2.SendUpdateMessage("Hello, from Client 2");
+
+        return Ok();
+    }
+
+
     [HttpGet("chat-subscribe/{user}")]
     public async Task<IActionResult> ChatSubscribe(string user)
     {
@@ -81,6 +101,23 @@ public class UtilController : ControllerBase
     {
         var parentGrain = _grainFactory.GetGrain<IParentGrain>(parentId);
         await parentGrain.SayHello(message);
+        return Ok();
+    }
+
+
+    [HttpGet("streaming")]
+    public async Task<IActionResult> Streaming()
+    {
+        string streamProviderName = "StreamProvider";
+        string streamNamespace = "StreamNamespace";
+        Guid streamGuid = Guid.NewGuid();
+
+
+        var producer = _grainFactory.GetGrain<IStreamProducerGrain>(0);
+        var consumer = _grainFactory.GetGrain<IStreamConsumerGrain>(0);
+        await producer.StartStreaming(streamProviderName, streamNamespace, streamGuid);
+        await consumer.StartConsume(streamProviderName, streamNamespace, streamGuid);
+
         return Ok();
     }
 }

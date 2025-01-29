@@ -16,7 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // app services
-builder.Services.AddTransient<IChatObserver, ChatObserver>();
+builder.Services.AddSingleton<IChatObserver, ChatObserver>();
 
 // OpenTelemetry config
 var serviceName = builder.Configuration["OpenTelemetry:ServiceName"]!;
@@ -82,6 +82,7 @@ builder.Host.UseOrleans(hostBuilder =>
                 options.ConnectionString = builder.Configuration.GetConnectionString("OrleansDB");
             }
         )
+        .AddMemoryStreams("StreamProvider").AddMemoryGrainStorage("PubSubStore")
         //.UseInMemoryReminderService()
         .UseAdoNetReminderService(options =>
         {

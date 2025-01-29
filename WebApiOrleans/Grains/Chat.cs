@@ -8,7 +8,7 @@ public interface IChatObserver : IGrainObserver
     Task ReceiveMessage(string message);
 }
 
-public class ChatObserver(ILogger<ChatObserver> logger) : IChatObserver
+public class ChatObserver(ILogger<ChatObserver> logger) : Grain, IChatObserver
 {
     public Task ReceiveMessage(string message)
     {
