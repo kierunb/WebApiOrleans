@@ -75,4 +75,12 @@ public class UtilController : ControllerBase
 
         return Ok();
     }
+
+    [HttpGet("parent-child/{parentId:int}/{message}")]
+    public async Task<IActionResult> ParentChild(int parentId, string message)
+    {
+        var parentGrain = _grainFactory.GetGrain<IParentGrain>(parentId);
+        await parentGrain.SayHello(message);
+        return Ok();
+    }
 }

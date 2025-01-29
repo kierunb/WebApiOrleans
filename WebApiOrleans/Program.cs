@@ -89,7 +89,7 @@ builder.Host.UseOrleans(hostBuilder =>
             options.ConnectionString = builder.Configuration.GetConnectionString("OrleansDB");
         })
         //.UseDashboard() // Orleans Dasboard available at: http://localhost:8080/
-        .UseDashboard(x => x.HostSelf = true)
+        .UseDashboard(options => { options.HostSelf = true; })
         .AddActivityPropagation() // required for tracing
         .ConfigureLogging(logging => logging.AddConsole());
 });
